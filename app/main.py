@@ -2,7 +2,7 @@ from base64 import b64decode
 import os
 
 import random
-from MonsterLab import Monster
+from MonsterLab.monster_lab import Monster
 from flask import Flask, render_template, request
 from pandas import DataFrame
 
@@ -10,9 +10,18 @@ from app.data import Database
 from app.graph import chart
 from app.machine import Machine
 
-SPRINT = 0
+SPRINT = 1
 APP = Flask(__name__)
 
+# Move the seeding code here
+db = Database(collection_name="BandersnatchDB")
+print("Initializing the database...")
+db.reset() # Clearing all previous database entries
+if db.count() == 0:
+    db.seed(n=1000)  # Filling database with 1000 new monsters
+    print("Database should have 1000 monsters.")
+else:
+    print(f"Database already contains {db.count()} monsters.")
 
 @APP.route("/")
 def home():
@@ -28,7 +37,6 @@ def home():
 def data():
     if SPRINT < 1:
         return render_template("data.html")
-    db = Database()
     return render_template(
         "data.html",
         count=db.count(),
@@ -40,7 +48,6 @@ def data():
 def view():
     if SPRINT < 2:
         return render_template("view.html")
-    db = Database()
     options = ["Level", "Health", "Energy", "Sanity", "Rarity"]
     x_axis = request.values.get("x_axis") or options[1]
     y_axis = request.values.get("y_axis") or options[2]
@@ -66,7 +73,6 @@ def view():
 def model():
     if SPRINT < 3:
         return render_template("model.html")
-    db = Database()
     options = ["Level", "Health", "Energy", "Sanity", "Rarity"]
     filepath = os.path.join("app", "model.joblib")
     if not os.path.exists(filepath):
@@ -97,4 +103,7 @@ def model():
 
 
 if __name__ == '__main__':
-    APP.run()
+    # Apparently gunicorn wouldn't run this
+    if db.count() == 0:
+        db.seed(n=1000)
+    #APP.run()
