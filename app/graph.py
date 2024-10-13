@@ -10,7 +10,7 @@ def chart(df: DataFrame, x: str, y: str, target: str) -> alt.Chart:
     - target: represented by color
 
     Returns:
-    - alt.Chart: a customized Altair Chart object
+    - alt.Chart: a customized chart that is using alt that works well
     """
     graph = alt.Chart(
         df,
